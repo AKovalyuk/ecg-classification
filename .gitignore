@@ -1,3 +1,4 @@
 plt/
 venv/
 .idea/
+__pycache__/
