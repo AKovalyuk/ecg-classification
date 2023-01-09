@@ -32,6 +32,10 @@ class Chromosome:
     def genes(self) -> List[Gene]:
         return self._genomes
 
+    @genes.setter
+    def genes(self, value: List[Gene]):
+        self._genomes = value
+
     @property
     def genes_data(self) -> List[int]:
         genes_data = []

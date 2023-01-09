@@ -14,9 +14,9 @@ class LayerSettings:
 
 class PopulationEnvironment:
     def __init__(self):
-        self._step_threshold = 2
-        self._kernel_threshold = 15
-        self._out_threshold = 288
+        self._step_threshold = 5
+        self._kernel_threshold = 21
+        self._out_threshold = 300
 
         self._layers_count = 3
         self._layers_size = [500, 1]
@@ -27,6 +27,10 @@ class PopulationEnvironment:
 
         self._population_count = 5
         self._mutation_chance = 0.1
+
+    @property
+    def population(self):
+        return self._population_count
 
     @property
     def learn_rate(self):
@@ -59,12 +63,12 @@ class PopulationEnvironment:
     def generate_population(self) -> List[Chromosome]:
         population = []
         for population_number in range(self._population_count):
-            chromosome = self._generate_chromosome()
+            chromosome = self.generate_chromosome()
             population.append(chromosome)
 
         return population
 
-    def _generate_chromosome(self) -> Chromosome:
+    def generate_chromosome(self) -> Chromosome:
         chromosome_genes = []
         for _ in range(self._layers_count):
             genes = self._generate_random_genes()
@@ -87,8 +91,3 @@ class PopulationEnvironment:
 
     def _random_kernel(self) -> int:
         return random.randrange(5, self._kernel_threshold, 2)
-
-
-# env = PopulationEnvironment()
-# z = env.generate_population()
-# print('adf')
