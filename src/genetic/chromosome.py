@@ -1,4 +1,5 @@
 from typing import List
+from random import randint
 
 
 class Gene:
@@ -50,3 +51,10 @@ class Chromosome:
     @fitness.setter
     def fitness(self, value: int):
         self._fitness = value
+
+    def point_crossover(self, chromosome):
+        idx = randint(1, len(chromosome.genes))
+
+        target_genomes = self.genes[:idx + 1]
+        other_genomes = chromosome.genes[idx + 1:]
+        return Chromosome(target_genomes + other_genomes)

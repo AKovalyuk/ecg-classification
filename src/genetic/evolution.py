@@ -27,6 +27,18 @@ class Evolution:
         self._fitness_calculation()
         return self._select()
 
+    def generate_new_population(self, parents: List[Chromosome]) -> List[Chromosome]:
+        mothers = parents[:len(parents) // 2]
+        fathers = parents[len(parents) // 2:]
+
+        new_population = []
+        for mother in mothers:
+            for father in fathers:
+                child = mother.point_crossover(father)
+                new_population.append(child)
+        new_population.append(self._env.generate_chromosome())
+        return new_population
+
     def _get_relative_chromosome_fitness(self) -> List[float]:
         relative_fitness = []
         total_fitness = self._get_total_fitness()
@@ -50,9 +62,6 @@ class Evolution:
 
     def _get_total_fitness(self):
         return sum([chromosome.fitness for chromosome in self._population])
-
-    def point_crossover(self, mather: Chromosome, father: Chromosome) -> Chromosome:
-        pass
 
     def _fitness_calculation(self):
         for chromosome_idx in range(len(self._population)):
@@ -124,4 +133,7 @@ class Evolution:
 x_train, x_test, y_train, y_test = preprocess_data(path='/home/twoics/py-proj/ecg-classification/plt')
 evolution = Evolution(x_train, y_train, x_test, y_test)
 # print(evolution._fitness_calculation())
-print(evolution.selection())
+best_parents = evolution.selection()
+print(best_parents)
+children = evolution.generate_new_population(best_parents)
+print(children)
