@@ -1,6 +1,7 @@
 import random
+from torch import nn
+from typing import List
 from dataclasses import dataclass
-
 from chromosome import Chromosome, Gene
 
 
@@ -13,19 +14,49 @@ class LayerSettings:
 
 class PopulationEnvironment:
     def __init__(self):
-        self._step_threshold = 10
+        self._step_threshold = 2
         self._kernel_threshold = 15
         self._out_threshold = 288
 
         self._layers_count = 3
+        self._layers_size = [500, 1]
+        self._criterion = nn.BCELoss()
+        self._epoch = 5
+        self._batch_size = 128
+        self._learn_rate = 0.0001
+
         self._population_count = 5
         self._mutation_chance = 0.1
+
+    @property
+    def learn_rate(self):
+        return self._learn_rate
+
+    @property
+    def epoch(self):
+        return self._epoch
+
+    @property
+    def batch_size(self):
+        return self._batch_size
+
+    @property
+    def criterion(self):
+        return self._criterion
+
+    @property
+    def layers(self):
+        return self._layers_count
+
+    @property
+    def layers_size(self):
+        return self._layers_size
 
     @property
     def mutation_chance(self):
         return self._mutation_chance
 
-    def generate_population(self):
+    def generate_population(self) -> List[Chromosome]:
         population = []
         for population_number in range(self._population_count):
             chromosome = self._generate_chromosome()
@@ -52,12 +83,12 @@ class PopulationEnvironment:
         return random.randrange(12, self._out_threshold, 12)
 
     def _random_step(self) -> int:
-        return random.randint(2, self._step_threshold)
+        return random.randint(1, self._step_threshold)
 
     def _random_kernel(self) -> int:
-        return random.randrange(3, self._kernel_threshold, 2)
+        return random.randrange(5, self._kernel_threshold, 2)
 
 
-env = PopulationEnvironment()
-z = env.generate_population()
-print('adf')
+# env = PopulationEnvironment()
+# z = env.generate_population()
+# print('adf')
