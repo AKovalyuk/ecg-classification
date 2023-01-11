@@ -171,7 +171,7 @@ def preprocess_data(
         mean_threshold: float = 0.05,
         ma_window_size: int = 2,
         test_size: int = 0.3,
-        random_state: int | None = None
+        random_state: int = None
     ):
     print("Loading data")
     data, labels, sig_names = load_data(path, frequency)
