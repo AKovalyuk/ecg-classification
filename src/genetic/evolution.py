@@ -17,17 +17,25 @@ class Evolution:
         self._env = PopulationEnvironment()
         self._population: List[Chromosome] = self._env.generate_population()
         self._device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        self._metrics = []
 
         self._x_train = x_train
         self._y_train = y_train
         self._x_test = x_test
         self._y_test = y_test
 
-    def selection(self) -> List[Chromosome]:
+    def fit(self, n_epoch: int):
+        for epoch in range(n_epoch):
+            best_parents = self._selection()
+            self._generate_new_population(best_parents)
+            self._make_mutation()
+            print(f'Epoch {epoch}, metric: {self._get_generation_metric()}')
+
+    def _selection(self) -> List[Chromosome]:
         self._fitness_calculation()
         return self._select()
 
-    def generate_new_population(self, parents: List[Chromosome]) -> List[Chromosome]:
+    def _generate_new_population(self, parents: List[Chromosome]):
         mothers = parents[:len(parents) // 2]
         fathers = parents[len(parents) // 2:]
 
@@ -37,7 +45,17 @@ class Evolution:
                 child = mother.point_crossover(father)
                 new_population.append(child)
         new_population.append(self._env.generate_chromosome())
-        return new_population
+        self._population = new_population
+
+    def _make_mutation(self):
+        if random.random() > self._env.mutation_chance:
+            chromosome = random.choice(self._population)
+            chromosome.make_mutation()
+
+    def _get_generation_metric(self) -> float:
+        res = sum(self._metrics) / len(self._metrics)
+        self._metrics = []
+        return res
 
     def _get_relative_chromosome_fitness(self) -> List[float]:
         relative_fitness = []
@@ -57,7 +75,7 @@ class Evolution:
             population.pop(chromosome_index)
             relative_fitness.pop(chromosome_index)
             next_population.append(chromosome)
-            print(f'-- {population} --', f'||{relative_fitness}||')
+            # print(f'-- {population} --', f'||{relative_fitness}||')
         return next_population
 
     def _get_total_fitness(self):
@@ -86,12 +104,13 @@ class Evolution:
             raise Exception()
 
         res = self._calculate_test_metric(net)
+        self._metrics.append(res)
         del net
         return res
 
     def _create_net(self, chromosome: Chromosome) -> ConvNet:
         genomes_part = [tuple(x) for x in np.array_split(chromosome.genes_data, self._env.layers)]
-        print(genomes_part)
+        # print(genomes_part)
         return ConvNet(
             fc_layers_size=self._env.layers_size,
             conv_layers=genomes_part
@@ -132,8 +151,4 @@ class Evolution:
 
 x_train, x_test, y_train, y_test = preprocess_data(path='/home/twoics/py-proj/ecg-classification/plt')
 evolution = Evolution(x_train, y_train, x_test, y_test)
-# print(evolution._fitness_calculation())
-best_parents = evolution.selection()
-print(best_parents)
-children = evolution.generate_new_population(best_parents)
-print(children)
+evolution.fit(20)

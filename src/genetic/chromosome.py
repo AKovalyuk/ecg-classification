@@ -1,3 +1,4 @@
+import random
 from typing import List
 from random import randint
 
@@ -27,7 +28,7 @@ class Chromosome:
         if not all(isinstance(genome, Gene) for genome in genomes):
             raise ValueError('All elements must be Genome type')
         self._fitness: int = 0
-        self._genomes = genomes
+        self._genomes: List[Gene] = genomes
 
     @property
     def genes(self) -> List[Gene]:
@@ -58,3 +59,6 @@ class Chromosome:
         target_genomes = self.genes[:idx + 1]
         other_genomes = chromosome.genes[idx + 1:]
         return Chromosome(target_genomes + other_genomes)
+
+    def make_mutation(self):
+        self._genomes[0].data = random.randrange(5, 15, 2)
