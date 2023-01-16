@@ -2,7 +2,7 @@ import random
 from torch import nn
 from typing import List
 from dataclasses import dataclass
-from chromosome import Chromosome, Gene
+from src.genetic.chromosome import Chromosome, Gene
 
 
 @dataclass
@@ -21,7 +21,7 @@ class PopulationEnvironment:
         self._layers_count = 3
         self._layers_size = [500, 1]
         self._criterion = nn.BCELoss()
-        self._epoch = 5
+        self._epoch = 10
         self._batch_size = 128
         self._learn_rate = 0.0001
 

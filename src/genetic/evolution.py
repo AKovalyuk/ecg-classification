@@ -6,10 +6,10 @@ from sklearn.metrics import accuracy_score
 from torch import optim
 import random
 
-from src.genetic.chromosome import Chromosome
-from src.genetic.enviroment import PopulationEnvironment
-from src.model import ConvNet
-from src.preprocessing import preprocess_data
+from .chromosome import Chromosome
+from .enviroment import PopulationEnvironment
+from ..model import ConvNet
+# from src.preprocessing import preprocess_data
 
 
 class Evolution:
@@ -29,7 +29,12 @@ class Evolution:
             best_parents = self._selection()
             self._generate_new_population(best_parents)
             self._make_mutation()
-            print(f'Epoch {epoch}, metric: {self._get_generation_metric()}')
+            print(f'Epoch {epoch}')
+            for chromosome in self._population:
+                print(f'\t\t{chromosome.genes_data}')
+            print(f'\t Metrics {self._metrics}')
+            print(f'\t Mean metric: {self._get_generation_metric()}')
+            print('\n')
 
     def _selection(self) -> List[Chromosome]:
         self._fitness_calculation()
@@ -78,6 +83,11 @@ class Evolution:
             # print(f'-- {population} --', f'||{relative_fitness}||')
         return next_population
 
+    # def _select(self):
+    #     population = self._population.copy()
+    #     population.sort()
+    #     return population[:len(population) - 2]
+
     def _get_total_fitness(self):
         return sum([chromosome.fitness for chromosome in self._population])
 
@@ -105,6 +115,9 @@ class Evolution:
 
         res = self._calculate_test_metric(net)
         self._metrics.append(res)
+        if res >= 0.9:
+            torch.save(net.state_dict(), 'model')
+            exit(1000)
         del net
         return res
 
@@ -149,6 +162,6 @@ class Evolution:
         )
 
 
-x_train, x_test, y_train, y_test = preprocess_data(path='/home/twoics/py-proj/ecg-classification/plt')
-evolution = Evolution(x_train, y_train, x_test, y_test)
-evolution.fit(20)
+# x_train, x_test, y_train, y_test = preprocess_data(path='/home/twoics/py-proj/ecg-classification/plt')
+# evolution = Evolution(x_train, y_train, x_test, y_test)
+# evolution.fit(1000)

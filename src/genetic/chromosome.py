@@ -62,3 +62,9 @@ class Chromosome:
 
     def make_mutation(self):
         self._genomes[0].data = random.randrange(5, 15, 2)
+
+    def __lt__(self, other):
+        return self.fitness < other.fitness
+
+    def __gt__(self, other):
+        return self.fitness > other.fitness
