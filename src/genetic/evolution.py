@@ -9,11 +9,17 @@ import random
 from .chromosome import Chromosome
 from .enviroment import PopulationEnvironment
 from ..model import ConvNet
+
+
 # from src.preprocessing import preprocess_data
 
 
 class Evolution:
     def __init__(self, x_train, y_train, x_test, y_test):
+        self.means = []
+        self.maxes = []
+        self.mines = []
+
         self._env = PopulationEnvironment()
         self._population: List[Chromosome] = self._env.generate_population()
         self._device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -27,14 +33,22 @@ class Evolution:
     def fit(self, n_epoch: int):
         for epoch in range(n_epoch):
             best_parents = self._selection()
-            self._generate_new_population(best_parents)
-            self._make_mutation()
+
+            metrics = self._metrics.copy()
+            self.maxes.append(max(self._metrics))
+            self.mines.append(min(self._metrics))
+            mean = self._get_generation_metric()
+            self.means.append(mean)
+
             print(f'Epoch {epoch}')
             for chromosome in self._population:
-                print(f'\t\t{chromosome.genes_data}')
-            print(f'\t Metrics {self._metrics}')
-            print(f'\t Mean metric: {self._get_generation_metric()}')
+                print(f'\t\t{chromosome.genes_data}, Epoch: {chromosome.epoch}')
+            print(f'\t Metrics {metrics}')
+            print(f'\t Mean metric: {mean}')
             print('\n')
+
+            self._generate_new_population(best_parents)
+            self._make_mutation()
 
     def _selection(self) -> List[Chromosome]:
         self._fitness_calculation()
@@ -108,16 +122,13 @@ class Evolution:
         self._net_to_device(net)
 
         try:
-            self._fit_net(net)
+            self._fit_net(net, chromosome)
         except Exception:
             del net
             raise Exception()
 
         res = self._calculate_test_metric(net)
         self._metrics.append(res)
-        if res >= 0.9:
-            torch.save(net.state_dict(), 'model')
-            exit(1000)
         del net
         return res
 
@@ -132,7 +143,7 @@ class Evolution:
     def _net_to_device(self, net: ConvNet):
         net.to(self._device)
 
-    def _fit_net(self, net: ConvNet):
+    def _fit_net(self, net: ConvNet, chromosome: Chromosome):
         criterion = self._env.criterion
         optimizer = optim.Adam(net.parameters(), lr=self._env.learn_rate)
         net.train_net(
@@ -140,7 +151,7 @@ class Evolution:
             optimizer=optimizer,
             objects=self._x_train,
             labels=self._y_train,
-            epochs=self._env.epoch,
+            epochs=chromosome.epoch,
             batch_size=self._env.batch_size
         )
 
@@ -160,7 +171,6 @@ class Evolution:
             [(1 if pred[0] > 0.5 else 0) for pred in
              Evolution._test(net.to(device), torch.Tensor(x).to(device, non_blocking=True))]
         )
-
 
 # x_train, x_test, y_train, y_test = preprocess_data(path='/home/twoics/py-proj/ecg-classification/plt')
 # evolution = Evolution(x_train, y_train, x_test, y_test)

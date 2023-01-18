@@ -16,12 +16,13 @@ class PopulationEnvironment:
     def __init__(self):
         self._step_threshold = 5
         self._kernel_threshold = 21
-        self._out_threshold = 300
+        self._out_threshold = 150
 
         self._layers_count = 3
         self._layers_size = [500, 1]
         self._criterion = nn.BCELoss()
-        self._epoch = 10
+        self._epoch = 3
+        self._max_epoch = 30
         self._batch_size = 128
         self._learn_rate = 0.0001
 
@@ -64,6 +65,7 @@ class PopulationEnvironment:
         population = []
         for population_number in range(self._population_count):
             chromosome = self.generate_chromosome()
+            chromosome.epoch = 2
             population.append(chromosome)
 
         return population
@@ -73,8 +75,10 @@ class PopulationEnvironment:
         for _ in range(self._layers_count):
             genes = self._generate_random_genes()
             chromosome_genes.extend(genes)
+        chromosome = Chromosome(chromosome_genes)
+        chromosome.epoch = self._random_epoch()
 
-        return Chromosome(chromosome_genes)
+        return chromosome
 
     def _generate_random_genes(self) -> tuple:
         kernel = self._random_kernel()
@@ -82,6 +86,9 @@ class PopulationEnvironment:
         step = self._random_step()
 
         return Gene(kernel), Gene(out), Gene(step)
+
+    def _random_epoch(self) -> int:
+        return random.randint(2, self._max_epoch)
 
     def _random_out(self) -> int:
         return random.randrange(12, self._out_threshold, 12)

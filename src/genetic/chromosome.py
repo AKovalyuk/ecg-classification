@@ -29,6 +29,15 @@ class Chromosome:
             raise ValueError('All elements must be Genome type')
         self._fitness: int = 0
         self._genomes: List[Gene] = genomes
+        self._epoch: int = 1
+
+    @property
+    def epoch(self) -> int:
+        return self._epoch
+
+    @epoch.setter
+    def epoch(self, value):
+        self._epoch = value
 
     @property
     def genes(self) -> List[Gene]:
@@ -58,7 +67,9 @@ class Chromosome:
 
         target_genomes = self.genes[:idx + 1]
         other_genomes = chromosome.genes[idx + 1:]
-        return Chromosome(target_genomes + other_genomes)
+        child = Chromosome(target_genomes + other_genomes)
+        child.epoch = max(self._epoch, chromosome.epoch)
+        return child
 
     def make_mutation(self):
         self._genomes[0].data = random.randrange(5, 15, 2)
