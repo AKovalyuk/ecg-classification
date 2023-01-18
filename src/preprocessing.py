@@ -9,7 +9,7 @@ import wfdb
 from sklearn.model_selection import train_test_split
 
 
-def load_data(path: Path, frequency: str) -> Tuple:
+def load_data(path: Path, frequency: str, target_class: str) -> Tuple:
     """Load data from dataset folder
     ### Parameters
     1. path : Path | str
@@ -50,7 +50,7 @@ def load_data(path: Path, frequency: str) -> Tuple:
     for diagnosis in series_labels:
         if diagnosis == ['NORM']:
             labels.append(0)
-        elif 'MI' in diagnosis:
+        elif target_class in diagnosis:
             labels.append(1)
         else:
             labels.append(2)
@@ -161,6 +161,7 @@ def balance_data(data, labels):
 def preprocess_data(
         path: Path,
         frequency: str = 'lr',
+        target_class: str = 'MI',
         std_threshold: float = 0.65,
         mean_threshold: float = 0.05,
         ma_window_size: int = 2,
@@ -168,7 +169,7 @@ def preprocess_data(
         random_state: int | None = None
 ):
     print("Loading data")
-    data, labels, sig_names = load_data(path, frequency)
+    data, labels, sig_names = load_data(path, frequency, target_class)
     print("Dropping other")
     data, labels = filter_others(data, labels)
     print("Filtering outliers")
